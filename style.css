@@ -1,0 +1,73 @@
+:root {
+  --element-bg-color: aquamarine;
+  --group-color: gray;
+  --diagram-background: white;
+  --diagram-stroke-width: 0.25rem;
+  --diagram-stroke-color: black;
+}
+
+railroad-diagram {
+  /* border: 1px dotted orange; */
+  display: block;
+  position: relative;
+  padding: 1rem;
+  background: var(--diagram-background);
+}
+
+railroad-diagram > svg {
+  color: black;
+  position: absolute;
+  inset: 0;
+  /* z-index: -1; */
+}
+
+railroad-container, railroad-group {
+  /* border: 1px dotted yellowgreen; */
+  /* Important: this is where the svg connects */
+  display: inline-block;
+  position: relative;
+}
+
+railroad-group {
+  border-width: 0.25rem;
+  border-color: var(--group-color);
+  border-style: dashed;
+  border-radius: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+railroad-group > span {
+  background: var(--diagram-background);
+  color: var(--group-color);
+  position: absolute;
+  top: -0.75rem;
+  left: 2rem;
+  padding: 0 0.25rem 0;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+railroad-terminal, railroad-nonterminal {
+  background-color: var(--element-bg-color);
+  border-width: var(--diagram-stroke-width);
+  border-color: var(--diagram-stroke-color);
+  border-style: solid;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  /* Important: this is where the svg connects */
+  padding: 0.5rem 1rem;
+  margin: 0.75rem;
+  line-height: 4rem;
+  white-space: nowrap;
+}
+
+railroad-nonterminal {
+  border-radius: 0;
+  text-transform: uppercase;
+}
+
+railroad-nonterminal {
+  border-radius: 0.75rem;
+  font-style: italic;
+  text-transform: lowercase;
+}
