@@ -1,39 +1,55 @@
 :root {
-  --element-bg-color: aquamarine;
+  --element-bg-color: hsl(120,100%,90%);
   --group-color: gray;
-  --diagram-background: white;
+  --diagram-background: hsl(30,20%,95%);;
   --diagram-stroke-width: 0.25rem;
   --diagram-stroke-color: black;
 }
 
 railroad-diagram {
   /* border: 1px dotted orange; */
-  display: block;
+  display: flex;
   position: relative;
   padding: 1rem;
   background: var(--diagram-background);
 }
 
+railroad-diagram-terminus {
+  border-width: var(--diagram-stroke-width);
+  color: var(--diagram-stroke-color);
+  border-left-style: solid;
+  border-right-style: solid;
+  padding: 1rem 0.25rem;
+}
+
 railroad-diagram > svg {
-  color: black;
+  color: var(--diagram-stroke-color);
   position: absolute;
   inset: 0;
   /* z-index: -1; */
 }
 
-railroad-container, railroad-group {
+railroad-diagram, railroad-sequence, railroad-group, railroad-stack {
   /* border: 1px dotted yellowgreen; */
   /* Important: this is where the svg connects */
-  display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   position: relative;
 }
 
+railroad-sequence {
+}
+
+railroad-group, railroad-stack {
+  margin: 1rem 0.5rem;
+}
+
 railroad-group {
-  border-width: 0.25rem;
+  border-width: var(--diagram-stroke-width);
   border-color: var(--group-color);
   border-style: dashed;
   border-radius: 0.75rem;
-  margin: 0.5rem 0;
 }
 
 railroad-group > span {
@@ -47,6 +63,22 @@ railroad-group > span {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+railroad-stack {
+  flex-direction: column;
+}
+
+railroad-skip {
+  margin: 1rem auto;
+}
+
+railroad-comment {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: small;
+  font-style: italic;
+  margin: 1rem auto;
+  padding: 0.25rem;
+}
+
 railroad-terminal, railroad-nonterminal {
   background-color: var(--element-bg-color);
   border-width: var(--diagram-stroke-width);
@@ -56,18 +88,17 @@ railroad-terminal, railroad-nonterminal {
   font-weight: bold;
   /* Important: this is where the svg connects */
   padding: 0.5rem 1rem;
-  margin: 0.75rem;
-  line-height: 4rem;
+  margin: 1rem 0.75rem;
   white-space: nowrap;
+  width: min-content;
+  height: min-content;
 }
 
-railroad-nonterminal {
+railroad-terminal {
   border-radius: 0;
-  text-transform: uppercase;
 }
 
 railroad-nonterminal {
   border-radius: 0.75rem;
   font-style: italic;
-  text-transform: lowercase;
 }
