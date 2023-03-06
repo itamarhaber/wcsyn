@@ -1,12 +1,12 @@
 :root {
-  --element-bg-color: hsl(120,100%,90%);
+  --element-bg-color: hsl(50, 100%, 90%, 50%);
   --group-color: gray;
-  --diagram-background: hsl(30,20%,95%);;
+  --diagram-background: transparent;
   --diagram-stroke-width: 0.25rem;
   --diagram-stroke-color: black;
 }
 
-railroad-diagram {
+rr-diagram {
   /* border: 1px dotted orange; */
   display: flex;
   position: relative;
@@ -14,7 +14,7 @@ railroad-diagram {
   background: var(--diagram-background);
 }
 
-railroad-diagram-terminus {
+rr-diagram-terminus {
   border-width: var(--diagram-stroke-width);
   color: var(--diagram-stroke-color);
   border-left-style: solid;
@@ -22,14 +22,14 @@ railroad-diagram-terminus {
   padding: 1rem 0.25rem;
 }
 
-railroad-diagram > svg {
+rr-diagram > svg {
   color: var(--diagram-stroke-color);
   position: absolute;
-  inset: 0;
-  /* z-index: -1; */
+  /* inset: 0; */
+  z-index: -1;
 }
 
-railroad-diagram, railroad-sequence, railroad-group, railroad-stack {
+rr-diagram, rr-sequence, rr-group, rr-stack {
   /* border: 1px dotted yellowgreen; */
   /* Important: this is where the svg connects */
   display: flex;
@@ -38,21 +38,21 @@ railroad-diagram, railroad-sequence, railroad-group, railroad-stack {
   position: relative;
 }
 
-railroad-sequence {
+rr-sequence {
 }
 
-railroad-group, railroad-stack {
+rr-group, rr-stack {
   margin: 1rem 0.5rem;
 }
 
-railroad-group {
+rr-group {
   border-width: var(--diagram-stroke-width);
   border-color: var(--group-color);
   border-style: dashed;
   border-radius: 0.75rem;
 }
 
-railroad-group > span {
+rr-group > span {
   background: var(--diagram-background);
   color: var(--group-color);
   position: absolute;
@@ -63,15 +63,15 @@ railroad-group > span {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-railroad-stack {
+rr-stack {
   flex-direction: column;
 }
 
-railroad-skip {
-  margin: 1rem auto;
+rr-skip {
+  margin: 1rem;
 }
 
-railroad-comment {
+rr-comment {
   font-family: Arial, Helvetica, sans-serif;
   font-size: small;
   font-style: italic;
@@ -79,7 +79,7 @@ railroad-comment {
   padding: 0.25rem;
 }
 
-railroad-terminal, railroad-nonterminal {
+rr-terminal, rr-nonterminal {
   background-color: var(--element-bg-color);
   border-width: var(--diagram-stroke-width);
   border-color: var(--diagram-stroke-color);
@@ -94,11 +94,11 @@ railroad-terminal, railroad-nonterminal {
   height: min-content;
 }
 
-railroad-terminal {
+rr-terminal {
   border-radius: 0;
 }
 
-railroad-nonterminal {
+rr-nonterminal {
   border-radius: 0.75rem;
   font-style: italic;
 }

@@ -2,28 +2,25 @@
 <html>
 
 <head>
-  <script src="main.js" defer></script>
+  <script src="main.js" type="module" defer></script>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="railroad.css" />
 </head>
 
 <body>
   <h1>Railroad diagrams</h1>
   <p>Example</p>
-  <railroad-diagram>
-    <railroad-terminal>HELLO</railroad-terminal>
-    <railroad-nonterminal>proto-version</railroad-nonterminal>
-    <railroad-group text="Authentication clause">
-      <railroad-terminal>AUTH</railroad-terminal>
-      <railroad-nonterminal>username</railroad-nonterminal>
-      <railroad-stack>
-        <railroad-nonterminal>password</railroad-nonterminal>  
-        <railroad-nonterminal>sha256sum</railroad-nonterminal>  
-      </railroad-stack>
-    </railroad-group>
-    <railroad-nonterminal>proto-version</railroad-nonterminal>
-    <railroad-nonterminal>proto-version</railroad-nonterminal>
-    <railroad-nonterminal>proto-version</railroad-nonterminal>
-  </railroad-diagram>
+  <rr-diagram>
+    <rr-start></rr-start>
+      <rr-terminal>HELLO</rr-terminal>
+      <rr-nonterminal>proto-version</rr-nonterminal>
+      <rr-sequence>
+        <rr-terminal>AUTH</rr-terminal>
+        <rr-nonterminal>username</rr-nonterminal>
+        <rr-nonterminal>password</rr-nonterminal>
+      </rr-sequence>
+    <rr-end></rr-end>
+  </rr-diagram>
 </body>
 
 </html>

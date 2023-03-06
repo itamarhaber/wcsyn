@@ -1,8 +1,50 @@
+import rr, * as rrClass from "./railroad.js";
 function fromPx(s) { return Number(s.slice(0,-2)) }
 
+function determineGaps(outer, inner) {
+	var diff = outer - inner;
+	switch(rrClass.Options.INTERNAL_ALIGNMENT) {
+		case 'left': return [0, diff];
+		case 'right': return [diff, 0];
+		default: return [diff/2, diff/2];
+	}
+}
+
+class RailroadRect extends rrClass.FakeSVG {
+	constructor(width, height, up=0, down=0, cls='') {
+		super('g', {'class': ['rect', cls].join(' ')});
+		this.width = width;
+		this._height = height;
+    this.height = 0;
+    this.up = up;
+    this.down = down;
+		this.needsSpace = true;
+	}
+	format(x, y, width) {
+		// Hook up the two sides if this is narrower than its stated width.
+		var gaps = determineGaps(width, this.width);
+		new rrClass.Path(x,y).h(gaps[0]).addTo(this);
+		new rrClass.Path(x+gaps[0]+this.width,y).h(gaps[1]).addTo(this);
+		x += gaps[0];
+
+		new rrClass.FakeSVG('rect', {x:x, y:y-11, width:this.width, height:this.up+this._height+this.down}).addTo(this);
+		return this;
+	}
+}
+
 class RailroadElement extends HTMLElement {
+  prePseudoElements;
+  postPseudoElements;
+  items;
+  delem;
   constructor () {
     super();
+    this.items = [];
+    this.prePseudoElements = this.postPseudoElements = 0;
+  }
+
+  toDiagram () {
+    return new rrClass.FakeSVG();
   }
 
   connectedCallback() {
@@ -30,7 +72,14 @@ class RailroadElement extends HTMLElement {
     const
       cx = Math.round((width-(right-left))/2);
   return {
-      x, left, y, top, width, right, height, bottom,
+      x: Math.round(x),
+      left: Math.round(left),
+      y: Math.round(y),
+      top: Math.round(top),
+      width: Math.round(width),
+      right: Math.round(right),
+      height: Math.round(height),
+      bottom: Math.round(bottom),
       ml, mr, mt, mb,
       pl, pr, pt, pb,
       bl, br, bt, bb,
@@ -42,9 +91,26 @@ class RailroadElement extends HTMLElement {
   }
 }
 
-class RailroadDiagramTerminus extends RailroadElement {
+class RailroadStart extends RailroadElement {
   constructor() {
     super();
+    const el = new rrClass.Start();
+    this.style.width = `${el.width}px`;
+    this.style.height = `${el.up + el.height + el.down}px`;
+  }
+
+  toDiagram () {
+    return new rrClass.Start();
+  }
+}
+
+class RailroadEnd extends RailroadElement {
+  constructor() {
+    super();
+  }
+
+  toDiagram () {
+    return new rrClass.End();
   }
 }
 
@@ -52,11 +118,21 @@ class RailroadSkip extends RailroadElement {
   constructor() {
     super();
   }
+
+  toDiagram () {
+    return new rrClass.Skip();
+  }
 }
 
 class RailroadTerminal extends RailroadElement {
   constructor() {
     super();
+  }
+
+  toDiagram () {
+    const s = this.getShape();
+    console.log(s)
+    return new RailroadRect(s.width, s.height);
   }
 }
 
@@ -64,17 +140,44 @@ class RailroadNonTerminal extends RailroadElement {
   constructor() {
     super();
   }
+
+  toDiagram () {
+    const s = this.getShape();
+    return new RailroadRect(s.width, s.height);
+  }
 }
 
 class RailroadComment extends RailroadElement {
   constructor() {
     super();
   }
+
+  toDiagram () {
+    return new rrClass.Comment(this.textContent);
+  }
 }
 
-class RailroadContainer extends RailroadElement {
+// class RailroadGroup extends RailroadElement {
+//   #label
+//   constructor() {
+//     super();
+//     this.mapping = rrClass.Group;
+//     this.#label = document.createElement('span');
+//     this.#label.textContent = this.getAttribute('text') || '';
+//     this.prepend(this.#label);
+//     this.prePseudoElements++;
+//   }
+
+//   toDiagram () {
+//     super.toDiagram();
+//     return new rrClass.Group(...this.items,);
+//   }
+// }
+
+class RailroadMultiContainer extends RailroadElement {
   constructor () {
     super();
+    this.mapping = rrClass.DiagramMultiContainer;
   }
 
   connectedCallback() {
@@ -103,94 +206,54 @@ class RailroadContainer extends RailroadElement {
     return path
   }
   
-  addHandles(s) {
-    const path = [];
-    path.push(`M${s.lox} ${s.loy}h${s.ml}`);
-    path.push(`M${s.rox-s.mr} ${s.roy}h${s.mr}`);
-    return path
-  }
+  toDiagram() {
+    const first = this.prePseudoElements;
+    const last = this.children.length - this.postPseudoElements - 1;
 
-  draw() {
-    console.debug('drawing container');
-    const path = [];
-    // TODO: path over container border?
-    const first = (this instanceof RailroadDiagram || this instanceof RailroadGroup) ? 1 : 0;
-    const last = this.children.length - first - 1;
-    const ts = this.getShape();
-    let prev;
-    for (let i = first; i < this.children.length; i++) {
+    for (let i = first; i <= last; i++) {
       const child = this.children[i];
-      if (child instanceof RailroadContainer) {
-        path.push(...child.draw());
-      } else if (!(child instanceof RailroadElement)) {
-        throw new TypeError(`Invalid element in <railroad-diagram> ${child.tagName}`);
-      }
-
-      const cs = child.getShape();
-      path.push(...this.addHandles(cs));
-      if (i === first) {
-        // TODO
-      } else if (first !== last) {
-        path.push(...this.#connectPath(prev.rox, prev.roy, cs.lox, cs.loy, cs.width, cs.height));
-      }
-      prev = cs;
-      // const { x1, y1, x2, y2 } = child.getConnectors();
-      // path.push(`L ${x1} ${y1} L ${x2} ${y2}`);
-      // path.push(`L ${Math.round(x1)} ${y1} H ${Math.round(end)}`);
+      if (!(child instanceof RailroadElement)) {
+        throw new TypeError(`Invalid element in <rr-diagram> ${child.tagName}`);
+      };
+      this.items.push(child.toDiagram());
     }
-    return path
   }
 }
 
-class RailroadSequence extends RailroadContainer {
+class RailroadSequence extends RailroadMultiContainer {
   constructor() {
     super();
   }
-}
 
-class RailroadGroup extends RailroadContainer {
-  #label
-  constructor() {
-    super();
-    this.#label = document.createElement('span');
-    this.#label.textContent = this.getAttribute('text') || '';
-    this.prepend(this.#label);
+  toDiagram () {
+    super.toDiagram();
+    return new rrClass.Sequence(...this.items);
   }
 }
 
-
-class RailroadStack extends RailroadContainer {
+class RailroadStack extends RailroadMultiContainer {
   constructor() {
     super();
   }
+
+  toDiagram () {
+    super.toDiagram();
+    return new rrClass.Stack(...this.items);
+  }
 }
 
-class RailroadDiagram extends RailroadContainer {
-  #svg;
-  #svgPath;
-  #start;
-  #end;
+class RailroadDiagram extends RailroadMultiContainer {
+  #rr;
 
   constructor () {
     super();
-
-    this.#start = document.createElement('railroad-diagram-terminus');
-    this.prepend(this.#start);
-    this.#end = document.createElement('railroad-diagram-terminus');
-    this.append(this.#end);
-
-    this.#svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    this.#svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    this.#svgPath.setAttribute('stroke-width', 'var(--diagram-stroke-width)');
-    this.#svgPath.setAttribute('stroke', 'currentColor');
-    this.#svgPath.setAttribute('fill', 'transparent');
-    this.#svg.appendChild(this.#svgPath);
-    this.prepend(this.#svg);
+    this.#rr = document.createElement('svg');
+    this.prepend(this.#rr);
+    this.prePseudoElements++;
   }
 
   connectedCallback() {
-    super.connectedCallback(); // LEIBALE HELP!P!
-    customElements.whenDefined('railroad-element')
+    customElements.whenDefined('rr-element')
       .then(() => setTimeout(() => this.draw()));
     window.addEventListener('resize',() => this.draw());
   }
@@ -200,23 +263,30 @@ class RailroadDiagram extends RailroadContainer {
   }
 
   draw() {
-    console.debug('drawing diagram');
-    const s = this.getShape();
-    this.#svg.setAttribute('viewBox', `${s.left} ${s.top} ${s.width} ${s.height}`);
-    const path = [];
-    path.push(...super.draw());
-    this.#svgPath.setAttributeNS(null, 'd', path.join(' '));
+    const first = this.prePseudoElements;
+    const last = this.children.length - this.postPseudoElements - 1;
+
+    const d = this.toDiagram().format(1,1,1,1);
+    this.#rr = d.toSVG();
+    this.children[0].remove();
+    this.prepend(this.#rr);
+  }
+
+  toDiagram() {
+    super.toDiagram();
+    return new rrClass.Diagram(...this.items);
   }
 }
 
-customElements.define('railroad-diagram', RailroadDiagram);
-customElements.define('railroad-diagram-terminus', RailroadDiagramTerminus);
-customElements.define('railroad-sequence', RailroadSequence);
-customElements.define('railroad-group', RailroadGroup);
-customElements.define('railroad-stack', RailroadStack);
-customElements.define('railroad-container', RailroadContainer);
-customElements.define('railroad-comment', RailroadComment);
-customElements.define('railroad-nonterminal', RailroadNonTerminal);
-customElements.define('railroad-terminal', RailroadTerminal);
-customElements.define('railroad-skip', RailroadSkip);
-customElements.define('railroad-element', RailroadElement);
+customElements.define('rr-diagram', RailroadDiagram);
+customElements.define('rr-sequence', RailroadSequence);
+// customElements.define('rr-group', RailroadGroup);
+customElements.define('rr-stack', RailroadStack);
+customElements.define('rr-multi-container', RailroadMultiContainer);
+customElements.define('rr-comment', RailroadComment);
+customElements.define('rr-nonterminal', RailroadNonTerminal);
+customElements.define('rr-terminal', RailroadTerminal);
+customElements.define('rr-skip', RailroadSkip);
+customElements.define('rr-start', RailroadStart);
+customElements.define('rr-end', RailroadEnd);
+customElements.define('rr-element', RailroadElement);
