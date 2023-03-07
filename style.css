@@ -6,47 +6,54 @@
   --diagram-stroke-color: red;
 }
 
-railroad-diagram {
-  /* border: 1px dotted orange; */
+rr-diagram {
   display: flex;
   /* grid-template-columns: min-content 1fr min-content; */
   flex-flow: row wrap;
   justify-content: center;
   position: relative;
-  gap: 2rem;
-  padding: 2rem;
+  column-gap: 1rem;
+  row-gap: 2rem;
+  padding: 1rem;
+  margin: 0 1rem;
   background: var(--diagram-background);
 }
 
-railroad-diagram > canvas {
+rr-diagram > canvas {
   position: absolute;
   inset: 0;
   z-index: -1;
 }
 
-railroad-terminus {
+rr-terminus {
   height: 2rem;
   width: 1rem;
 }
 
-railroad-sequence {
+rr-sequence {
   display: flex;
   flex-flow: row wrap;
-  gap: 2rem;
+  gap: 1rem;
+  margin: 0 1rem;
   justify-content: center;
 }
 
-railroad-group, railroad-stack {
+rr-stack {
+  display: grid;
+  gap: 2rem;
+  margin: 0 1rem;
+  justify-items: center;
+  padding: 0 1rem;
 }
 
-railroad-group {
+rr-group {
   border-width: var(--diagram-stroke-width);
   border-color: var(--group-color);
   border-style: dashed;
   border-radius: 0.75rem;
 }
 
-railroad-group > span {
+rr-group > span {
   background: var(--diagram-background);
   color: var(--group-color);
   position: absolute;
@@ -57,34 +64,31 @@ railroad-group > span {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-railroad-stack {
-  flex-direction: column;
+rr-skip {
 }
 
-railroad-skip {
-}
-
-railroad-comment {
+rr-comment {
   font-family: Arial, Helvetica, sans-serif;
   font-size: small;
   font-style: italic;
   padding: 0.25rem;
 }
 
-railroad-terminal, railroad-nonterminal {
+rr-terminal, rr-nonterminal {
   background-color: var(--element-bg-color);
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
   /* Important: this is where the svg connects */
   padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
   white-space: nowrap;
   width: min-content;
   height: min-content;
 }
 
-railroad-terminal {
+rr-terminal {
 }
 
-railroad-nonterminal {
+rr-nonterminal {
   font-style: italic;
 }

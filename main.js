@@ -7,8 +7,74 @@ class Canvas {
     this.el = canvasElement;
     const ctx = this.el.getContext('2d'); // why is this needed?
   }
+/*
+O ---- X  X ---- O
+|                |
+X                X
+
+X                X
+|                |
+O ---- X  X ---- O
+
+X ---- X
+
+X
+|
+X
+
+ */
+  connectPath(points) {
+    if (!(points instanceof Array)) {
+      throw new TypeError (`Expecting an array`);
+    }
+    const ctx = this.el.getContext('2d');
+    const path = new Path2D;
+    let px, py;
+    for (let i = 0; i < points.length; i++) {
+      const [x, y] = points[i];
+      if (i !== 0) {
+        const above = y < py, below = y > py, behind = x < px, after = x > px;
+        path.moveTo(x,y);
+        if (after && above) {
+          path.lineTo(px+AR,y);
+          path.arcTo(px,y,px,y+AR,AR);
+          path.lineTo(px,py);
+        } else if (after && below) {
+          path.lineTo(x,y-AR);
+          path.arcTo(x,py,px,py,AR);
+          path.lineTo(px,py);
+        } else if (behind && above) {
+          path.lineTo(x,y+AR);
+          path.arcTo(x,py,px,py,AR);
+          path.lineTo(px,py);
+        } else if (behind && below) {
+          path.lineTo(px-AR,y);
+          path.arcTo(px,y,px,py,AR);
+          path.lineTo(px,py);
+        } else {
+          path.lineTo(px,py);
+        }
+      }
+      if (i === points.length - 1) {
+
+      }
+      px = x, py = y;
+    }
+    ctx.save();
+    ctx.stroke(path);
+    ctx.restore();
+  }
+
   roundRect(s) {
-    // Because rectRound isn't supported in FF :/
+    // Because rectRound isn't supported in Mozilla FF :/
+    // const points = [
+    //   [s.left+s.hw,s.top],
+    //   [s.right,s.top+s.hh],
+    //   [s.left+s.hw,s.bottom],
+    //   [s.left,s.top+s.hh],
+    //   [s.left+s.hw,s.top],
+    // ];
+    // this.connectPath(points);
     const ctx = this.el.getContext('2d', { });
     const path = new Path2D;
     path.moveTo(s.left+AR,s.top);
@@ -26,8 +92,6 @@ class Canvas {
     ctx.restore();
   }
 }
-
-
 
 class RailroadElement extends HTMLElement {
   constructor () {
@@ -50,6 +114,14 @@ class RailroadElement extends HTMLElement {
       x, left, y, top, width, right, height, bottom
     } = this.getBoundingClientRect();
     const hh = Math.round(height/2);
+    const hw = Math.round(width/2);
+    const hcg = Math.round(fromPx(this.style.columnGap || window.getComputedStyle(this).columnGap)/2);
+    const hrg = Math.round(fromPx(this.style.rowGap || window.getComputedStyle(this).rowGap)/2);
+    const hml = Math.round(fromPx(this.style.marginLeft || window.getComputedStyle(this).marginLeft)/2);
+    const hmr = Math.round(fromPx(this.style.marginRight || window.getComputedStyle(this).marginRight)/2);
+    const hpl = Math.round(fromPx(this.style.paddingLeft || window.getComputedStyle(this).paddingLeft)/2);
+    const hpr = Math.round(fromPx(this.style.paddingRight || window.getComputedStyle(this).paddingRight)/2);
+
     return {
       x: Math.round(x),
       left: Math.round(left),
@@ -61,12 +133,30 @@ class RailroadElement extends HTMLElement {
       bottom: Math.round(bottom),
       y1: Math.round(y) + hh,
       y2: Math.round(y) + hh,
+      hw, hh, hcg, hrg, hml, hmr, hpl, hpr,
     }
   }
 
   draw(_) {
     this.rect = this.getRect();
     return this.rect;
+  }
+
+  drawHandles(canvas,left=true, right=true) {
+    const ctx = canvas.el.getContext('2d');
+    ctx.save();
+    if (left) {
+      const l = this instanceof RailroadContainer ? this.rect.hcg : this.rect.hpl;
+      ctx.moveTo(this.rect.left, this.rect.y1);
+      ctx.lineTo(this.rect.left-l, this.rect.y1);      
+    }
+    if (right) {
+      const r = this instanceof RailroadContainer ? this.rect.hcg : this.rect.hpr;
+      ctx.moveTo(this.rect.right, this.rect.y2);
+      ctx.lineTo(this.rect.right+r, this.rect.y2);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
 }
 
@@ -148,22 +238,18 @@ class RailroadContainer extends RailroadElement {
   disconnectedCallback() {
     console.debug('RailroadElement disconnectedCallback');
   }
-
-  #isNewLine(x1,y1,x2,y2) {
-    return x2-x1 <= 0 && y2-y1 > 0;
-  }
   
   draw(canvas) {
     console.debug('drawing container');
     const first = this.prePseudoEls;
     const last = this.children.length - this.postPseudoEls - 1;
-    const cgap = Math.round(fromPx(this.style.columnGap || window.getComputedStyle(this).columnGap)/2);
-    const ctx = canvas.el.getContext('2d');
     const me = super.draw();
+    const ctx = canvas.el.getContext('2d');
+    ctx.save();
     for (let i = first; i <= last; i++) {
       const child = this.children[i];
       if (!(child instanceof RailroadElement)) {
-        throw new TypeError(`Invalid element in <railroad-diagram> ${child.tagName}`);
+        throw new TypeError(`Invalid element in <rr-diagram> ${child.tagName}`);
       }
       const rect = child.draw(canvas);
       if (i === first) {
@@ -172,17 +258,12 @@ class RailroadContainer extends RailroadElement {
       if (i === last) {
         me.y2 = rect.y2;
       }
-      
-      // Draw connectors
-      const path = new Path2D;
-      path.moveTo(rect.left, rect.y1);
-      path.lineTo(rect.left-cgap, rect.y1);  
-      path.moveTo(rect.right, rect.y2);
-      path.lineTo(rect.right+cgap, rect.y2);
-      ctx.save()
-      ctx.stroke(path);
-      ctx.restore();
+      if (!(child instanceof RailroadContainer)) {
+        child.drawHandles(canvas);
+      }
     }
+    ctx.stroke();
+    ctx.restore();
     return me;
   }
 }
@@ -194,43 +275,55 @@ class RailroadSequence extends RailroadContainer {
   draw(canvas) {
     const first = this.prePseudoEls;
     const last = this.children.length - this.postPseudoEls - 1;
-    const cgap = Math.round(fromPx(this.style.columnGap || window.getComputedStyle(this).columnGap)/2);
-    const rgap = Math.round(fromPx(this.style.rowGap || window.getComputedStyle(this).rowGap)/2);
-    const ctx = canvas.el.getContext('2d');
     const me = super.draw(canvas);
-    if (me.y1 !== me.y2) {
-      // Line wraps
-      let py = 0, px = 0, pb = 0;
-      for (let i = first; i <= last; i++) {
-        const child = this.children[i];
-        if (i === first) {
-          py = child.rect.y2;
-          px = child.rect.right + cgap;
-          pb = child.rect.bottom + rgap;
-        }
-        if (px >= child.rect.x && py < child.rect.y1) {
-          // Draw line wrap path
-          const path = new Path2D;
-          path.moveTo(px+cgap-1,py);
-          path.arcTo(px+cgap*2,py,px+cgap*2,pb,AR);
-          path.lineTo(px+cgap*2,pb-AR);
-          path.arcTo(px+cgap*2,pb,child.rect.x+ctx.lineWidth,child.rect.y1,AR);
-          path.lineTo(child.rect.x-cgap,pb);
-          path.arcTo(child.rect.x-2*cgap+ctx.lineWidth,pb,child.rect.x-2*cgap+ctx.lineWidth,child.rect.y1,AR);
-          path.lineTo(child.rect.x-2*cgap+ctx.lineWidth,child.rect.y1-AR);
-          path.arcTo(child.rect.x-2*cgap+ctx.lineWidth,child.rect.y1,child.rect.x,child.rect.y1,AR);
-          path.lineTo(child.rect.x-cgap+ctx.lineWidth,child.rect.y1);
-          ctx.save();
-          ctx.stroke(path);
-          ctx.restore();
-          px = 0;
-          py = child.rect.y2;
-          pb = child.rect.bottom+rgap;
-        }
-        px = child.rect.right;
+    const ctx = canvas.el.getContext('2d');
+    ctx.save()
+    const path = new Path2D;
+    let py = 0, px = 0, pb = 0, pc = false;
+    for (let i = first; i <= last; i++) {
+      const child = this.children[i];
+      if (i === first) {
+        path.moveTo(me.left,child.rect.y1);
+        path.lineTo(child.rect.x,child.rect.y1);
+      }
+      if (i === last) {
+        path.moveTo(child.rect.right,child.rect.y2);
+        path.lineTo(me.right,child.rect.y2);
+      }
+      if (px >= child.rect.x && py < child.rect.y1) {
+        // Draw line wrap path
+        let x = me.right-me.hpr, y = pb+me.hrg;
+        path.moveTo(px,py);
+        path.arcTo(x,py,x,pb,AR); // Right, down
+        path.lineTo(x,y-AR);
+        path.arcTo(x,y,px+me.hpl,y,AR);
+        x = me.left+me.hpl*2;
+        path.lineTo(x,y);
+        x -= me.hpl;
+        path.arcTo(x,y,x,child.rect.y1,AR);
+        y = child.rect.y1;
+        path.lineTo(x,y-AR);
+        path.arcTo(x,y,child.rect.x,y,AR);
+        path.lineTo(child.rect.x,y);
+        ctx.save();
+        ctx.stroke(path);
+        ctx.restore();
+        px = 0;
         py = child.rect.y2;
-      }  
+        pb = child.rect.bottom;
+      } else if (i !== first && !pc) {
+        // Mind the gap
+        // path.moveTo(px,py);
+        // path.lineTo(child.rect.x,py);
+      }
+      px = child.rect.right;
+      py = child.rect.y2;
+      pb = Math.max(pb, child.rect.bottom);
+      pc = child instanceof RailroadContainer;
     }
+    this.rect.y2 = me.y2 = me.y1;
+    ctx.stroke(path);
+    ctx.restore();
     return me;
   }
 }
@@ -246,9 +339,14 @@ class RailroadGroup extends RailroadContainer {
 }
 
 
-class RailroadStack extends RailroadContainer {
+class RailroadStack extends RailroadSequence {
   constructor() {
     super();
+  }
+
+  draw(canvas) {
+    const me = super.draw(canvas);
+    return me;
   }
 }
 
@@ -259,10 +357,10 @@ class RailroadDiagram extends RailroadSequence {
 
   constructor () {
     super();
-    this.#start = document.createElement('railroad-terminus');
+    this.#start = document.createElement('rr-terminus');
     // this.prepend(this.#start);
     // this.prePseudoEls++;
-    // this.#end = document.createElement('railroad-terminus');
+    // this.#end = document.createElement('rr-terminus');
     // this.append(this.#end);
     // this.postPseudoEls++;
     this.#canvas = new Canvas(document.createElement('canvas'));
@@ -272,7 +370,7 @@ class RailroadDiagram extends RailroadSequence {
 
   connectedCallback() {
     super.connectedCallback(); // LEIBALE HELP!P!
-    customElements.whenDefined('railroad-element')
+    customElements.whenDefined('rr-element')
       .then(() => setTimeout(() => this.draw()));
     window.addEventListener('resize',() => this.draw());
   }
@@ -303,14 +401,14 @@ class RailroadDiagram extends RailroadSequence {
   }
 }
 
-customElements.define('railroad-diagram', RailroadDiagram);
-customElements.define('railroad-terminus', RailroadTerminus);
-customElements.define('railroad-sequence', RailroadSequence);
-customElements.define('railroad-group', RailroadGroup);
-customElements.define('railroad-stack', RailroadStack);
-customElements.define('railroad-container', RailroadContainer);
-customElements.define('railroad-comment', RailroadComment);
-customElements.define('railroad-nonterminal', RailroadNonTerminal);
-customElements.define('railroad-terminal', RailroadTerminal);
-customElements.define('railroad-skip', RailroadSkip);
-customElements.define('railroad-element', RailroadElement);
+customElements.define('rr-diagram', RailroadDiagram);
+customElements.define('rr-terminus', RailroadTerminus);
+customElements.define('rr-sequence', RailroadSequence);
+customElements.define('rr-group', RailroadGroup);
+customElements.define('rr-stack', RailroadStack);
+customElements.define('rr-container', RailroadContainer);
+customElements.define('rr-comment', RailroadComment);
+customElements.define('rr-nonterminal', RailroadNonTerminal);
+customElements.define('rr-terminal', RailroadTerminal);
+customElements.define('rr-skip', RailroadSkip);
+customElements.define('rr-element', RailroadElement);
