@@ -12,17 +12,15 @@
   <railroad-diagram>
     <railroad-terminal>HELLO</railroad-terminal>
     <railroad-nonterminal>proto-version</railroad-nonterminal>
-    <railroad-group text="Authentication clause">
-      <railroad-terminal>AUTH</railroad-terminal>
-      <railroad-nonterminal>username</railroad-nonterminal>
-      <railroad-stack>
-        <railroad-nonterminal>password</railroad-nonterminal>  
-        <railroad-nonterminal>sha256sum</railroad-nonterminal>  
-      </railroad-stack>
-    </railroad-group>
+    <railroad-terminal>HELLO</railroad-terminal>
     <railroad-nonterminal>proto-version</railroad-nonterminal>
-    <railroad-nonterminal>proto-version</railroad-nonterminal>
-    <railroad-nonterminal>proto-version</railroad-nonterminal>
+    <railroad-sequence>
+      <railroad-terminal>HELLO</railroad-terminal>
+      <railroad-nonterminal>proto-version</railroad-nonterminal>
+      <railroad-terminal>HELLO</railroad-terminal>
+      <railroad-nonterminal>proto-version</railroad-nonterminal>
+      <railroad-terminal>HELLO</railroad-terminal>  
+    </railroad-sequence>
   </railroad-diagram>
 </body>
 

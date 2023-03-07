@@ -1,48 +1,42 @@
 :root {
-  --element-bg-color: hsl(120,100%,90%);
+  --element-bg-color: transparent;
   --group-color: gray;
-  --diagram-background: hsl(30,20%,95%);;
+  --diagram-background: transparent;
   --diagram-stroke-width: 0.25rem;
-  --diagram-stroke-color: black;
+  --diagram-stroke-color: red;
 }
 
 railroad-diagram {
   /* border: 1px dotted orange; */
   display: flex;
+  /* grid-template-columns: min-content 1fr min-content; */
+  flex-flow: row wrap;
+  justify-content: center;
   position: relative;
-  padding: 1rem;
+  gap: 2rem;
+  padding: 2rem;
   background: var(--diagram-background);
 }
 
-railroad-diagram-terminus {
-  border-width: var(--diagram-stroke-width);
-  color: var(--diagram-stroke-color);
-  border-left-style: solid;
-  border-right-style: solid;
-  padding: 1rem 0.25rem;
-}
-
-railroad-diagram > svg {
-  color: var(--diagram-stroke-color);
+railroad-diagram > canvas {
   position: absolute;
   inset: 0;
-  /* z-index: -1; */
+  z-index: -1;
 }
 
-railroad-diagram, railroad-sequence, railroad-group, railroad-stack {
-  /* border: 1px dotted yellowgreen; */
-  /* Important: this is where the svg connects */
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  position: relative;
+railroad-terminus {
+  height: 2rem;
+  width: 1rem;
 }
 
 railroad-sequence {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 2rem;
+  justify-content: center;
 }
 
 railroad-group, railroad-stack {
-  margin: 1rem 0.5rem;
 }
 
 railroad-group {
@@ -68,37 +62,29 @@ railroad-stack {
 }
 
 railroad-skip {
-  margin: 1rem auto;
 }
 
 railroad-comment {
   font-family: Arial, Helvetica, sans-serif;
   font-size: small;
   font-style: italic;
-  margin: 1rem auto;
   padding: 0.25rem;
 }
 
 railroad-terminal, railroad-nonterminal {
   background-color: var(--element-bg-color);
-  border-width: var(--diagram-stroke-width);
-  border-color: var(--diagram-stroke-color);
-  border-style: solid;
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
   /* Important: this is where the svg connects */
   padding: 0.5rem 1rem;
-  margin: 1rem 0.75rem;
   white-space: nowrap;
   width: min-content;
   height: min-content;
 }
 
 railroad-terminal {
-  border-radius: 0;
 }
 
 railroad-nonterminal {
-  border-radius: 0.75rem;
   font-style: italic;
 }
