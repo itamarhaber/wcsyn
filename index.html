@@ -8,7 +8,71 @@
 
 <body>
   <h1>Railroad diagrams</h1>
-  <p>Example</p>
+  <p>Examples</p>
+  <rr-diagram>
+    <rr-terminal>MIGRATE</rr-terminal>
+    <rr-nonterminal>host</rr-nonterminal>
+    <rr-nonterminal>port</rr-nonterminal>
+    <rr-choice>
+      <rr-nonterminal>key</rr-nonterminal>
+      <rr-terminal>""</rr-terminal>
+    </rr-choice>
+    <rr-nonterminal>destination-db</rr-nonterminal>
+    <rr-nonterminal>timeout</rr-nonterminal>
+    <rr-terminal optional>COPY</rr-terminal>
+    <rr-terminal optional>REPLACE</rr-terminal>
+    <rr-choice optional title="Authentication clause">
+      <rr-sequence title="Legacy AUTH">
+        <rr-terminal>AUTH</rr-terminal>
+        <rr-nonterminal>password</rr-nonterminal>
+      </rr-sequence>
+      <rr-sequence title="Modern AUTH">
+        <rr-terminal>AUTH2</rr-terminal>
+        <rr-nonterminal>username</rr-nonterminal>
+        <rr-nonterminal>password</rr-nonterminal>
+      </rr-sequence>
+    </rr-choice>
+    <rr-nonterminal optional repeat>key</rr-nonterminal>
+  </rr-diagram>
+
+  <rr-diagram>
+    <rr-terminal>BITFIELD</rr-terminal>
+    <rr-nonterminal>key</rr-nonterminal>
+    <rr-sequence repeat>
+      <rr-choice>
+        <rr-sequence title="Read operations">
+          <rr-terminal>GET</rr-terminal>
+          <rr-nonterminal>encoding</rr-nonterminal>      
+          <rr-nonterminal>offset</rr-nonterminal>      
+        </rr-sequence>
+        <rr-sequence title="Write operations">
+          <rr-sequence optional title="OVERFLOW clause">
+            <rr-terminal>OVERFLOW</rr-terminal>
+            <rr-choice>
+              <rr-terminal>WRAP</rr-terminal>
+              <rr-terminal>SAT</rr-terminal>
+              <rr-terminal>FAIL</rr-terminal>
+            </rr-choice>
+          </rr-sequence>
+          <rr-choice>
+            <rr-sequence title="SET clause">
+              <rr-terminal>SET</rr-terminal>
+              <rr-nonterminal>encoding</rr-nonterminal>      
+              <rr-nonterminal>offset</rr-nonterminal>      
+              <rr-nonterminal>value</rr-nonterminal>      
+            </rr-sequence>
+            <rr-sequence title="INCRBY clause">
+              <rr-terminal>INCRBY</rr-terminal>
+              <rr-nonterminal>encoding</rr-nonterminal>      
+              <rr-nonterminal>offset</rr-nonterminal>      
+              <rr-nonterminal>increment</rr-nonterminal>      
+            </rr-sequence>
+          </rr-choice>
+        </rr-sequence>
+      </rr-choice>
+    </rr-sequence>
+  </rr-diagram>
+
   <rr-diagram>
     <rr-terminal>SET</rr-terminal>
     <rr-nonterminal>key</rr-nonterminal>
