@@ -10,36 +10,33 @@
   <h1>Railroad diagrams</h1>
   <p>Example</p>
   <rr-diagram>
-    <rr-sequence>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-      <rr-nonterminal>another</rr-nonterminal>
-      <rr-nonterminal>another2</rr-nonterminal>
-      <rr-nonterminal>a</rr-nonterminal>
-    </rr-sequence>
-    <rr-sequence>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-    </rr-sequence>
-    <rr-sequence>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-    </rr-sequence>
-    <rr-sequence>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-    </rr-sequence>
-    <rr-sequence>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-    </rr-sequence>
-    <rr-sequence>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-      <rr-terminal>HELLO</rr-terminal>
-      <rr-nonterminal>proto-version</rr-nonterminal>
-      <rr-terminal>HELLO</rr-terminal>  
-    </rr-sequence>
+    <rr-terminal>SET</rr-terminal>
+    <rr-nonterminal>key</rr-nonterminal>
+    <rr-nonterminal>value</rr-nonterminal>
+    <rr-choice optional title="Existential check">
+      <rr-terminal>XX</rr-terminal>
+      <rr-terminal>NX</rr-terminal>      
+    </rr-choice>
+    <rr-terminal optional>GET</rr-terminal>
+    <rr-choice optional title="Expiration clause">
+      <rr-sequence>
+        <rr-terminal>EX</rr-terminal>
+        <rr-nonterminal>seconds</rr-nonterminal>
+      </rr-sequence>
+      <rr-sequence>
+        <rr-terminal>PX</rr-terminal>
+        <rr-nonterminal>milliseconds</rr-nonterminal>
+      </rr-sequence>
+      <rr-sequence>
+        <rr-terminal>EXAT</rr-terminal>
+        <rr-nonterminal>unix-time-seconds</rr-nonterminal>
+      </rr-sequence>
+      <rr-sequence>
+        <rr-terminal>PXAT</rr-terminal>
+        <rr-nonterminal>unix-time-milliseconds</rr-nonterminal>
+      </rr-sequence>
+      <rr-terminal>KEEPTTL</rr-terminal>
+    </rr-choice>
   </rr-diagram>
 </body>
 

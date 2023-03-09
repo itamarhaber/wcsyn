@@ -1,24 +1,34 @@
-:root {
-  --element-bg-color: transparent;
-  --group-color: gray;
-  --diagram-background: transparent;
-  --diagram-stroke-width: 0.25rem;
-  --diagram-stroke-color: red;
+:root {}
+
+rr-diagram [optional] {
+  margin-top: var(--gap-block);
+}
+
+rr-diagram [repeat] {
+  margin-bottom: var(--gap-block);
+}
+
+rr-diagram {
+  font-family: 'Courier New', Courier, monospace;
+  position: relative;
+  padding: var(--gap-block) var(--gap-inline);
 }
 
 rr-diagram, rr-sequence {
   --gap-block: 2rem;
-  --gap-inline: 1rem;
+  --gap-inline: 2rem;
 
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: var(--gap-block) var(--gap-inline);
 }
 
-rr-diagram {
-  position: relative;
-  padding: var(--gap-block) var(--gap-inline);
-  background-color: var(--diagram-background);
+rr-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-inline);
 }
 
 rr-diagram > canvas {
@@ -27,13 +37,16 @@ rr-diagram > canvas {
   z-index: -1;
 }
 
-rr-terminus {
-  height: 2rem;
-  width: 1rem;
+rr-terminal, rr-nonterminal {
+  padding: 0.5em 1em;
 }
 
-rr-sequence {
-  /* margin-inline: 1rem; */
+rr-terminal {
+  background-color: hsl(60, 100%, 90%);
+}
+
+rr-nonterminal {
+  background-color: hsl(120, 100%, 90%);
 }
 
 /* rr-stack {
@@ -73,20 +86,12 @@ rr-comment {
 }
 
 rr-terminal, rr-nonterminal {
-  background-color: var(--element-bg-color);
-  font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
-  /* Important: this is where the svg connects */
-  padding: 0.5rem 1rem;
-  margin: 0 0.5rem;
-  white-space: nowrap;
-  width: min-content;
-  height: min-content;
-}
-
-rr-terminal {
+  border: 4px solid black;
+  
 }
 
 rr-nonterminal {
   font-style: italic;
+  border-radius: .5em;
 }
