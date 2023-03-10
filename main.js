@@ -1,7 +1,5 @@
 function fromPx(s) { return Number(s.slice(0,-2)) }
 
-const AR = 8;
-
 class Path {
   #x;
 
@@ -32,17 +30,10 @@ class Path {
   }
 
   #canvas;
+  #AR;
 
-  get width() {
-    return this.#canvas.clientWidth;
-  }
-
-  get height() {
-    return this.#canvas.clientHeight;
-  }
-
-  constructor(canvas) {
-    this.#canvas = canvas;
+  constructor(arcRadius, lineWidth) {
+    this.#AR = arcRadius;
   }
 
   moveTo(x, y) {
@@ -81,32 +72,32 @@ class RailroadElement extends HTMLElement {
     if (!this.hasAttribute('optional')) return;
 
     const { x, y } = path;
-    path.verticalTo(this.offsetTop - gap.block / 2);
-    path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.inline / 2);
+    path.verticalTo(this.offsetTop - gap.block);
+    path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.midInline);
     path.verticalTo(y);
     path.x = x;
   }
 
-  #drawRepeat(path, gap) {
-    if (!this.hasAttribute('repeat')) return;
+  #drawRepeatable(path, gap) {
+    if (!this.hasAttribute('repeatable')) return;
 
     const { x, y } = path;
-    path.verticalTo(this.offsetTop + this.offsetHeight + gap.block / 2);
-    path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.inline / 2);
+    path.verticalTo(this.offsetTop + this.offsetHeight + gap.block);
+    path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.midInline);
     path.verticalTo(y);
     path.x = x;
   }
 
   drawAttributes(path, gap) {
     this.#drawOptional(path, gap);
-    this.#drawRepeat(path, gap);
+    this.#drawRepeatable(path, gap);
   }
 
   draw(path, gap) {
     const { x, midHeight, width } = this.getRect();
-    path.lineTo(x, midHeight);
-    path.x += width - 1;
-    path.horizontalTo(path.x + gap.inline / 2);
+    path.lineTo(x + 1, midHeight);
+    path.x += width - 2;
+    path.horizontalTo(path.x + gap.midInline + 1);
   }
 
   getRect() {
@@ -115,10 +106,14 @@ class RailroadElement extends HTMLElement {
       y: this.offsetTop,
       width: this.offsetWidth,
       height: this.offsetHeight,
-      midHeight: this.offsetTop + Math.round(this.offsetHeight / 2)
+      midHeight: this.offsetTop + Math.floor(this.offsetHeight / 2)
     };
   }
 }
+
+class RailroadStart extends RailroadElement {}
+
+class RailroadEnd extends RailroadElement {}
 
 class RailroadTerminal extends RailroadElement {}
 
@@ -145,16 +140,14 @@ class RailroadContainer extends RailroadElement {
   }
 
   getGap() {
-    const computedStyle = getComputedStyle(this);
-    const block = fromPx(computedStyle['row-gap']),
-      inline = fromPx(computedStyle['column-gap']),
-      midBlock = Math.round(block / 2),
-      midInline = Math.round(inline / 2);
+    const computedStyle = getComputedStyle(this),
+      block = fromPx(computedStyle['row-gap']),
+      inline = fromPx(computedStyle['column-gap']);
     return {
-      block,
-      inline,
-      hBlock: midBlock,
-      hInline: midInline
+      block: Math.round(block),
+      inline: Math.round(inline),
+      midBlock: Math.round(block / 2),
+      midInline: Math.round(inline / 2)
     };
   }
 }
@@ -167,11 +160,12 @@ class RailroadSequence extends RailroadContainer {
         { midHeight } = child.getRect();
 
       if (path.x > child.offsetLeft) {
-        const prev = this.children[i-1].getRect();
-        path.horizontalTo(path.width - gap.hInline);
-        path.verticalTo(prev.y + lineHeight + gap.hBlock);
-        path.horizontalTo(gap.hInline);
+        let prev = this.children[i-1];
+        path.horizontalTo(prev.offsetLeft + prev.offsetWidth + gap.inline);
+        path.verticalTo(prev.offsetTop + lineHeight + gap.midBlock);
+        path.horizontalTo(child.offsetLeft - gap.inline);
         path.verticalTo(midHeight);
+        path.horizontalTo(child.offsetLeft - gap.midInline);
         lineHeight = child.offsetHeight;
       } else if (child.offsetHeight > lineHeight) {
         lineHeight = child.offsetHeight;
@@ -190,9 +184,9 @@ class RailroadChoice extends RailroadContainer {
       path.verticalTo(child.getRect().midHeight);
       child.drawAttributes(path, gap);
       child.draw(path, gap);
-      path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.hInline);
+      path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.midInline);
       path.verticalTo(y);
-      path.moveTo(x, y);
+      path.x = x;
     }
 
     path.x += this.offsetWidth + gap.inline;
@@ -231,11 +225,15 @@ class RailroadDiagram extends RailroadSequence {
     this.#canvas.style.width = `${this.clientWidth}px`;
     this.#canvas.style.height = `${this.clientHeight}px`;
 
-    const path = new Path(this.#canvas);
+    const computedStyle = getComputedStyle(this);
+    const arcRadius = fromPx(computedStyle.getPropertyValue('--arc-radius')) || 8;
+    const lineWidth = fromPx(computedStyle.getPropertyValue('--line-width')) || 4;
+
+    const path = new Path(this.#canvas, arcRadius);
     super.draw(path, this.getGap(), 1);
     
     // TODO: use css custome property - should be the same as borders
-    this.#ctx.lineWidth = 4;
+    this.#ctx.lineWidth = lineWidth;
     this.#ctx.scale(devicePixelRatio, devicePixelRatio);
     this.#ctx.stroke(path.path2d);
 
@@ -251,6 +249,12 @@ const ELEMENTS = [{
 }, {
   name: 'rr-choice',
   constructor: RailroadChoice
+}, {
+  name: 'rr-start',
+  constructor: RailroadStart,
+}, {
+  name: 'rr-end',
+  constructor: RailroadEnd,
 }, {
   name: 'rr-terminal',
   constructor: RailroadTerminal,

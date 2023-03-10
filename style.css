@@ -1,34 +1,42 @@
 :root {}
 
+rr-diagram {
+  --terminal-background-color: hsl(120, 100%, 90%);
+  --nonterminal-background-color: hsl(120, 100%, 90%);
+  --gap-block: 2em;
+  --gap-inline: 3em;
+  --border-radius: 1em;
+  --arc-radius: 8px;  /* px value only */
+  --line-width: 4px;  /* px value only */
+  --line-color: black;
+}
+
 rr-diagram [optional] {
   margin-top: var(--gap-block);
 }
 
-rr-diagram [repeat] {
+rr-diagram [repeatable] {
   margin-bottom: var(--gap-block);
 }
 
 rr-diagram {
-  font-family: 'Courier New', Courier, monospace;
   position: relative;
   padding: var(--gap-block) var(--gap-inline);
 }
 
 rr-diagram, rr-sequence {
-  --gap-block: 2rem;
-  --gap-inline: 2rem;
-
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--gap-block) var(--gap-inline);
+  padding-inline: var(--gap-inline);
 }
 
 rr-choice {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--gap-inline);
+  gap: var(--gap-block) var(--gap-inline);
 }
 
 rr-diagram > canvas {
@@ -38,60 +46,27 @@ rr-diagram > canvas {
 }
 
 rr-terminal, rr-nonterminal {
-  padding: 0.5em 1em;
+  padding: 0.25em 0.5em;
+  font-weight: bold;
+  border-color: var(--line-color);
+  border-width: var(--line-width);
+  border-style: solid;
 }
 
 rr-terminal {
-  background-color: hsl(60, 100%, 90%);
+  background-color: var(--terminal-background-color);
+  border-radius: var(--border-radius);
 }
 
 rr-nonterminal {
-  background-color: hsl(120, 100%, 90%);
-}
-
-/* rr-stack {
-  display: grid;
-  gap: 2rem;
-  margin: 0 1rem;
-  justify-items: center;
-  padding: 0 1rem;
-} */
-
-rr-group {
-  border-width: var(--diagram-stroke-width);
-  border-color: var(--group-color);
-  border-style: dashed;
-  border-radius: 0.75rem;
-}
-
-rr-group > span {
-  background: var(--diagram-background);
-  color: var(--group-color);
-  position: absolute;
-  top: -0.75rem;
-  left: 2rem;
-  padding: 0 0.25rem 0;
-  font-weight: bold;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-rr-skip {
-}
-
-rr-comment {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: small;
+  background-color: var(--nonterminal-background-color);
   font-style: italic;
-  padding: 0.25rem;
 }
 
-rr-terminal, rr-nonterminal {
-  font-weight: bold;
-  border: 4px solid black;
-  
-}
-
-rr-nonterminal {
-  font-style: italic;
-  border-radius: .5em;
+rr-start, rr-end {
+  padding-block: 0.5em;
+  padding-inline: 0.25em;
+  border-color: var(--line-color);
+  border-width: var(--line-width);
+  border-style: solid;
 }
