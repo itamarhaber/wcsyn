@@ -146,9 +146,15 @@ class RailroadContainer extends RailroadElement {
 
   getGap() {
     const computedStyle = getComputedStyle(this);
+    const block = fromPx(computedStyle['row-gap']),
+      inline = fromPx(computedStyle['column-gap']),
+      midBlock = Math.round(block / 2),
+      midInline = Math.round(inline / 2);
     return {
-      block: fromPx(computedStyle['row-gap']),
-      inline: fromPx(computedStyle['column-gap'])
+      block,
+      inline,
+      hBlock: midBlock,
+      hInline: midInline
     };
   }
 }
@@ -161,9 +167,10 @@ class RailroadSequence extends RailroadContainer {
         { midHeight } = child.getRect();
 
       if (path.x > child.offsetLeft) {
-        path.horizontalTo(path.width - gap.inline / 2);
-        path.verticalTo(path.y + lineHeight - gap.block / 4);
-        path.horizontalTo(gap.inline / 2);
+        const prev = this.children[i-1].getRect();
+        path.horizontalTo(path.width - gap.hInline);
+        path.verticalTo(prev.y + lineHeight + gap.hBlock);
+        path.horizontalTo(gap.hInline);
         path.verticalTo(midHeight);
         lineHeight = child.offsetHeight;
       } else if (child.offsetHeight > lineHeight) {
@@ -183,7 +190,7 @@ class RailroadChoice extends RailroadContainer {
       path.verticalTo(child.getRect().midHeight);
       child.drawAttributes(path, gap);
       child.draw(path, gap);
-      path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.inline / 2);
+      path.horizontalTo(this.offsetLeft + this.offsetWidth + gap.hInline);
       path.verticalTo(y);
       path.moveTo(x, y);
     }

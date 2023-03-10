@@ -32,13 +32,13 @@
         <rr-nonterminal>password</rr-nonterminal>
       </rr-sequence>
     </rr-choice>
-    <rr-nonterminal optional repeat>key</rr-nonterminal>
+    <rr-nonterminal optional repeatable>key</rr-nonterminal>
   </rr-diagram>
-
+  <hr />
   <rr-diagram>
     <rr-terminal>BITFIELD</rr-terminal>
     <rr-nonterminal>key</rr-nonterminal>
-    <rr-sequence repeat>
+    <rr-sequence repeatable>
       <rr-choice>
         <rr-sequence title="Read operations">
           <rr-terminal>GET</rr-terminal>
@@ -72,7 +72,7 @@
       </rr-choice>
     </rr-sequence>
   </rr-diagram>
-
+  <hr />
   <rr-diagram>
     <rr-terminal>SET</rr-terminal>
     <rr-nonterminal>key</rr-nonterminal>
