@@ -24,6 +24,14 @@
 <body>
   <h1>Railroad diagrams</h1>
   <rr-diagram class="migrate">
+    <rr-terminal optional>MIGRATE</rr-terminal>
+    <rr-choice>
+      <rr-terminal>MODE</rr-terminal>
+      <rr-terminal>REPLACE</rr-terminal>
+    </rr-choice>
+  </rr-diagram>
+  <!--
+  <rr-diagram class="migrate">
     <rr-terminal>MIGRATE</rr-terminal>
     <rr-nonterminal>host</rr-nonterminal>
     <rr-nonterminal>port</rr-nonterminal>
@@ -114,6 +122,7 @@
       <rr-terminal>KEEPTTL</rr-terminal>
     </rr-choice>
   </rr-diagram>
+  !-->
 </body>
 
 </html>

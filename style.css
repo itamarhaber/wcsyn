@@ -7,7 +7,7 @@ rr-diagram {
   --gap-inline: 3em;
   --border-radius: 1em;
   --arc-radius: 8px;  /* px value only */
-  --line-width: 4px;  /* px value only */
+  --line-width: 1px;  /* px value only */
   --line-color: black;
 }
 
@@ -29,7 +29,7 @@ rr-diagram, rr-sequence {
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--gap-block) var(--gap-inline);
-  padding-inline: var(--gap-inline);
+  /* padding-inline: var(--gap-inline); */
 }
 
 rr-choice {
@@ -37,6 +37,7 @@ rr-choice {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--gap-block) var(--gap-inline);
+  padding-inline: var(--gap-inline);  /* TODO: makes sense? */
 }
 
 rr-diagram > canvas {
