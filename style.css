@@ -1,22 +1,26 @@
-:root {}
-
 rr-diagram {
+  --background-color: transparent;
   --terminal-background-color: hsl(120, 100%, 90%);
   --nonterminal-background-color: hsl(120, 100%, 90%);
   --gap-block: 2em;
-  --gap-inline: 3em;
+  --gap-inline: 2em;
   --border-radius: 1em;
-  --arc-radius: 8px;  /* px value only */
+  --arc-radius: 10px;  /* px value only, set to 1px for no arcs, must not exceed ~1/2 gap */
   --line-width: 1px;  /* px value only */
   --line-color: black;
 }
 
 rr-diagram [optional] {
-  margin-top: var(--gap-block);
+  margin-top: calc(0.5 * var(--gap-block));
 }
 
 rr-diagram [repeatable] {
-  margin-bottom: var(--gap-block);
+  margin-bottom: calc(0.5 * var(--gap-block));
+}
+
+rr-diagram [optional], rr-diagram [repeatable] {
+  margin-left: calc(0.5 * var(--gap-inline));
+  margin-right: calc(0.5 * var(--gap-inline));
 }
 
 rr-diagram {
@@ -29,7 +33,10 @@ rr-diagram, rr-sequence {
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--gap-block) var(--gap-inline);
-  /* padding-inline: var(--gap-inline); */
+}
+
+rr-sequence {
+  /* padding-inline: calc(0.5 * var(--gap-inline)); */
 }
 
 rr-choice {
@@ -43,7 +50,7 @@ rr-choice {
 rr-diagram > canvas {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
 }
 
 rr-terminal, rr-nonterminal {
@@ -67,6 +74,7 @@ rr-nonterminal {
 rr-start, rr-end {
   padding-block: 0.5em;
   padding-inline: 0.25em;
+  align-self: center;
   border-color: var(--line-color);
   border-width: var(--line-width);
   border-style: solid;
